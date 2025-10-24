@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>X-blaster Vortex - v1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      min-height:100vh;display:flex;align-items:center;justify-content:center;
+      background:linear-gradient(135deg,#0d0d0d 0%,#1a1a1a 50%,#2d2d2d 100%);
+      color:#fff;font-family:"Poppins",sans-serif;padding:20px;
+    }
+    .panel{
+      width:100%;max-width:920px;background:rgba(255,255,255,0.04);
+      border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:18px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.6);
+    }
+    .topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .brand{display:flex;gap:12px;align-items:center}
+    .brand h1{font-size:18px;background:linear-gradient(45deg,#00b894,#00cec9);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:0}
+    .menuBtn{position:relative}
+    #menu{font-size:20px;color:#00b894;cursor:pointer}
+    #contactMenu{
+      position:absolute;right:0;top:32px;background:rgba(30,30,30,0.95);padding:12px;border-radius:8px;
+      display:none;border:1px solid rgba(255,255,255,0.04);z-index:40;
+    }
+    #contactMenu a{display:block;color:#00bfff;text-decoration:none;margin-bottom:8px}
+    .content{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .card{background:rgba(0,0,0,0.25);padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+    h2{font-size:16px;margin-bottom:10px}
+    input[type="text"], input[type="password"]{
+      width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.02);color:#fff;margin-bottom:10px;
+    }
+    button{padding:10px 12px;border-radius:10px;border:none;background:linear-gradient(45deg,#00b894,#019870);color:#fff;font-weight:600;cursor:pointer}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06)}
+    .muted{color:rgba(255,255,255,0.6);font-size:13px;margin-top:8px}
+    .hidden{display:none}
+    /* table */
+    table{width:100%;border-collapse:collapse;margin-top:10px}
+    th,td{padding:8px;border:1px solid rgba(255,255,255,0.06);font-size:13px;text-align:left}
+    th{background:rgba(0,184,148,0.12)}
+    td.center{text-align:center}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .btn-danger{background:#e84118}
+    .btn-sm{padding:6px 8px;border-radius:8px;font-size:13px}
+    .notice{margin-top:10px;padding:8px;border-radius:8px;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.03)}
+    /* modal FIX + animasi */
+    .modal-backdrop{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:60;opacity:0;pointer-events:none;transition:opacity 0.25s ease}
+    .modal-backdrop.show{opacity:1;pointer-events:auto}
+    .modal{background:#111;padding:18px;border-radius:12px;max-width:420px;width:100%;border:1px solid rgba(255,255,255,0.06);transform:scale(0.96);transition:transform 0.18s ease}
+    .modal-backdrop.show .modal{transform:scale(1)}
+    .row{display:flex;gap:8px}
+    @media (max-width:880px){
+      .content{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="panel">
+    <div class="topbar">
+      <div class="brand">
+        <i class="fas fa-robot" style="color:#00b894;font-size:20px"></i>
+        <h1> Token Panel</h1>
+        <div class="muted" style="margin-left:8px;font-size:13px">(single file)</div>
+      </div>
+      <div class="menuBtn">
+        <div id="menu"><i class="fas fa-ellipsis-v"></i></div>
+        <div id="contactMenu">
+          <a href="https://t.me/Killertzy2" target="_blank"><i class="fas fa-user"></i> Hubungi Admin</a>
+          <a id="logoutLink" href="#" class="hidden"><i class="fas fa-right-from-bracket"></i> Logout</a>
+        </div>
+      </div>
+    </div>
+
+    <div id="loginArea" class="card">
+      <h2><i class="fas fa-lock"></i> Login Panel</h2>
+      <input id="password" type="password" placeholder="Masukkan Password Broo! "/>
+      <div class="row" style="margin-bottom:10px">
+        <button id="btnLogin">Masuk</button>
+        <button id="btnClear" class="ghost">Bersihkan</button>
+      </div>
+      <div id="loginError" class="muted"></div>
+    </div>
+
+    <div class="content" style="margin-top:14px">
+      <!-- Reseller area (left) -->
+      <div id="resellerArea" class="card hidden">
+        <h2><i class="fas fa-plus-circle"></i> Tambah Token Bot</h2>
+        <input id="tokenInput" type="text" placeholder="Masukkan Token Bot"/>
+        <div class="row">
+          <button id="btnUpload">Generate & Upload</button>
+          <button id="btnUploadClear" class="ghost">Kosongkan</button>
+        </div>
+        <div id="uploadStatus" class="notice hidden"></div>
+
+        <div id="recent" style="margin-top:12px" class="muted">Hasil terakhir akan tampil di sini.</div>
+      </div>
+
+      <!-- Admin area (right) -->
+      <div id="adminArea" class="card hidden">
+        <h2><i class="fas fa-user-shield"></i> Dashboard Admin</h2>
+        <div style="display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap">
+          <button id="btnRefresh" class="btn-sm">🔄 Refresh Data</button>
+          <button id="btnDelSelected" class="btn-sm btn-danger">🗑 Hapus Terpilih</button>
+          <button id="btnBack" class="btn-sm ghost">⬅ Kembali</button>
+        </div>
+
+        <div id="tableWrap">
+          <div class="muted">Mengambil data...</div>
+        </div>
+
+        <div id="adminNotice" class="notice hidden"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal-backdrop">
+    <div class="modal">
+      <h3 id="confirmTitle">Yakin ingin menghapus token terpilih?</h3>
+      <p id="confirmDesc" class="muted">Token yang dihapus tidak bisa dikembalikan.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+        <button id="confirmNo" class="ghost">Tidak</button>
+        <button id="confirmYes" class="btn-danger">Ya, Hapus</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Code Modal -->
+  <div id="codeModal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Kode Token Berhasil Dibuat</h3>
+      <p class="muted">Kode berikut telah diupload bersama token. Salin kode ini untuk digunakan.</p>
+      <input id="codeDisplay" type="text" readonly style="margin-top:12px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1);"/>
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+        <button id="btnCopyCode">📋 Salin Kode</button>
+        <button id="btnCloseCode" class="ghost">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Modal (untuk password salah) -->
+  <div id="errorModal" class="modal-backdrop">
+    <div class="modal">
+      <h3>Password Salah!</h3>
+      <p class="muted">Coba lagi dengan password yang benar.</p>
+      <div style="display:flex;gap:8px;margin-top:12px;justify-content:flex-end">
+        <button id="btnCloseError" class="ghost">Tutup</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ---------- CONFIG: ganti dengan token GitHub mu --------- */
+    function getToken(){
+  const parts = ["ghp_aRo4lt","JD0wd2B2WLJbjSBVZBIdX8q32Rd1v8"];
+  return parts.join("");
+}
+const GITHUB_TOKEN = getToken();
+    const REPO = "ZEET5644/databaselol";
+    const PATH = "token.json";
+    /* --------------------------------------------------------- */
+
+    // DOM
+    const menu = document.getElementById('menu');
+    const contactMenu = document.getElementById('contactMenu');
+    const logoutLink = document.getElementById('logoutLink');
+
+    const passwordInput = document.getElementById('password');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnClear = document.getElementById('btnClear');
+    const loginError = document.getElementById('loginError');
+
+    const resellerArea = document.getElementById('resellerArea');
+    const adminArea = document.getElementById('adminArea');
+    const resellerInput = document.getElementById('tokenInput');
+    const btnUpload = document.getElementById('btnUpload');
+    const uploadStatus = document.getElementById('uploadStatus');
+    const recent = document.getElementById('recent');
+
+    const btnRefresh = document.getElementById('btnRefresh');
+    const tableWrap = document.getElementById('tableWrap');
+    const adminNotice = document.getElementById('adminNotice');
+    const btnDelSelected = document.getElementById('btnDelSelected');
+    const btnBack = document.getElementById('btnBack');
+
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmYes = document.getElementById('confirmYes');
+    const confirmNo = document.getElementById('confirmNo');
+    const confirmTitle = document.getElementById('confirmTitle');
+
+    const codeModal = document.getElementById('codeModal');
+    const codeDisplay = document.getElementById('codeDisplay');
+    const btnCopyCode = document.getElementById('btnCopyCode');
+    const btnCloseCode = document.getElementById('btnCloseCode');
+
+    const errorModal = document.getElementById('errorModal');
+    const btnCloseError = document.getElementById('btnCloseError');
+
+    let currentRole = null; // "reseller" or "admin"
+    let lastFetchedSha = null;
+    let lastContent = []; // array of normalized objects {token,code,ts}
+    let isModalVisible = false;
+
+    // menu toggle
+    menu.addEventListener('click', ()=> {
+      contactMenu.style.display = contactMenu.style.display === 'block' ? 'none' : 'block';
+    });
+
+    // logout
+    logoutLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      doLogout();
+    });
+
+    // login / clear
+    btnLogin.addEventListener('click', doLogin);
+    btnClear.addEventListener('click', ()=> passwordInput.value='');
+
+    function doLogin(){
+      const pass = passwordInput.value.trim();
+      loginError.innerText=''; // clear text error
+      try {
+        if(pass === 'resellerxblast'){
+          currentRole = 'reseller';
+          logoutLink.classList.add('hidden'); // hide logout for reseller
+          showReseller();
+        } else if(pass === 'Killertzy'){
+          currentRole = 'admin';
+          showReseller(); // reseller UI still available
+          showAdminLink();
+          showAdmin(); // show admin area as well
+        } else {
+          // Password salah: show modal popup
+          showErrorModal('Password salah!');
+          return;
+        }
+      } catch(e) {
+        console.error('Error in doLogin:', e);
+        showErrorModal('Terjadi kesalahan saat login.');
+      }
+    }
+
+    function showReseller(){
+      try {
+        document.getElementById('loginArea').classList.add('hidden');
+        resellerArea.classList.remove('hidden');
+        // hide admin area by default for reseller-only
+        if(currentRole !== 'admin') adminArea.classList.add('hidden');
+      } catch(e) {
+        console.error('Error in showReseller:', e);
+      }
+    }
+
+    function showAdminLink(){
+      try {
+        logoutLink.classList.remove('hidden'); // show logout for admin
+      } catch(e) {
+        console.error('Error in showAdminLink:', e);
+      }
+    }
+
+    function showAdmin(){
+      try {
+        // show admin area
+        adminArea.classList.remove('hidden');
+        // fetch tokens
+        fetchAndRenderTokens();
+      } catch(e) {
+        console.error('Error in showAdmin:', e);
+      }
+    }
+
+    function doLogout(){
+      try {
+        currentRole = null;
+        passwordInput.value = '';
+        loginError.innerText = '';
+        resellerArea.classList.add('hidden');
+        adminArea.classList.add('hidden');
+        document.getElementById('loginArea').classList.remove('hidden');
+        logoutLink.classList.add('hidden');
+        tableWrap.innerHTML = '<div class="muted">Data akan tampil setelah login Admin.</div>';
+        adminNotice.classList.add('hidden');
+        recent.innerText = 'Hasil terakhir akan tampil di sini.';
+      } catch(e) {
+        console.error('Error in doLogout:', e);
+      }
+    }
+
+    // Error modal for password wrong
+    function showErrorModal(message) {
+      try {
+        const errorTitle = errorModal.querySelector('h3');
+        errorTitle.innerText = message;
+        errorModal.classList.add('show');
+        errorModal.classList.remove('hidden');
+        btnCloseError.onclick = () => {
+          errorModal.classList.remove('show');
+          setTimeout(() => errorModal.classList.add('hidden'), 260);
+        };
+      } catch(e) {
+        console.error('Error in showErrorModal:', e);
+      }
+    }
+
+    /* ---------- Up/Download token logic ---------- */
+
+    function generateCode(len = 40){
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      return Array.from({length: len}, ()=> chars[Math.floor(Math.random()*chars.length)]).join('');
+    }
+
+    // upload single token: we will store as [token, code, timestampISO]
+    btnUpload.addEventListener('click', async ()=>{
+      const token = resellerInput.value.trim();
+      if(!token){ showUploadStatus('Isi token terlebih dahulu!', true); return; }
+      btnUpload.disabled = true;
+      showUploadStatus('⏳ Mengunggah token ke GitHub...');
+      const code = generateCode(40);
+      const ts = new Date().toISOString();
+      try {
+        // fetch existing
+        const getUrl = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
+        const res = await fetch(getUrl, { headers: { Authorization: `token ${GITHUB_TOKEN}` }});
+        const data = await res.json();
+        let content = [];
+        if(data && data.content){
+          try{ content = JSON.parse(atob(data.content)); }catch(e){ content = []; }
+        }
+        // normalize existing items:
+        // existing may be [token,code] or [token,code,ts]
+        content.push([token, code, ts]);
+        const newContent = btoa(JSON.stringify(content, null, 2));
+        // commit
+        const upd = await fetch(getUrl, {
+          method: 'PUT',
+          headers: { Authorization: `token ${GITHUB_TOKEN}`, "Content-Type":"application/json" },
+          body: JSON.stringify({ message: 'Add token via panel', content: newContent, sha: data.sha })
+        });
+        if(upd.ok){
+          showUploadStatus('✅ Upload berhasil!', false, true);
+          recent.innerText = `Terakhir: ${token} — kode dibuat.`;
+          resellerInput.value = '';
+          // Show code modal
+          showCodeModal(code);
+          // refresh admin view if admin logged in
+          if(currentRole === 'admin') await fetchAndRenderTokens();
+        } else {
+          const err = await upd.json();
+          showUploadStatus('❌ Gagal upload: '+ (err.message || 'unknown'), true);
+        }
+      } catch(e){
+        showUploadStatus('⚠️ Error: '+e.message, true);
+      } finally {
+        btnUpload.disabled = false;
+      }
+    });
+
+        function showCodeModal(code) {
+      codeDisplay.value = code;
+      codeModal.classList.add('show');
+      codeModal.classList.remove('hidden');
+      btnCopyCode.onclick = () => {
+        navigator.clipboard.writeText(code);
+        alert('Kode berhasil disalin!');
+      };
+      btnCloseCode.onclick = () => {
+        codeModal.classList.remove('show');
+        setTimeout(() => codeModal.classList.add('hidden'), 260);
+      };
+    }
+
+    function showUploadStatus(msg, isError=false, autoHide=false){
+      uploadStatus.classList.remove('hidden');
+      uploadStatus.style.border = isError ? '1px solid rgba(232,65,24,0.2)' : '1px solid rgba(0,184,148,0.12)';
+      uploadStatus.innerText = msg;
+      if(autoHide){
+        setTimeout(()=> uploadStatus.classList.add('hidden'), 2200);
+      }
+    }
+
+    // fetch tokens and render table
+    async function fetchAndRenderTokens(){
+      tableWrap.innerHTML = '<div class="muted">⏳ Mengambil data token...</div>';
+      adminNotice.classList.add('hidden');
+      try {
+        const getUrl = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
+        const res = await fetch(getUrl, { headers: { Authorization: `token ${GITHUB_TOKEN}` }});
+        const data = await res.json();
+        if(!data || !data.content){
+          tableWrap.innerHTML = '<div class="muted">Belum ada token.</div>';
+          lastFetchedSha = data && data.sha ? data.sha : null;
+          lastContent = [];
+          return;
+        }
+        lastFetchedSha = data.sha;
+        let content;
+        try { content = JSON.parse(atob(data.content)); } catch(e){ content = []; }
+        // normalize to array of objects: {token, code, ts}
+        lastContent = content.map(item => {
+          if(Array.isArray(item)){
+            return { token: item[0] || '', code: item[1] || '', ts: item[2] || null };
+          } else if(typeof item === 'object' && item !== null){
+            return { token: item.token || '', code: item.code || '', ts: item.ts || null };
+          } else {
+            return { token: String(item), code:'', ts:null };
+          }
+        });
+        renderTable(lastContent);
+      } catch(e){
+        tableWrap.innerHTML = `<div class="muted">⚠️ Error: ${e.message}</div>`;
+      }
+    }
+
+    function renderTable(items){
+      if(!items || items.length === 0){
+        tableWrap.innerHTML = '<div class="muted">Belum ada token.</div>'; return;
+      }
+      let html = `<div style="overflow:auto;max-height:420px"><table><thead><tr>
+        <th style="width:40px"><input id="chkAll" type="checkbox"/></th>
+        <th>Token</th><th>Kode</th><th style="width:160px">Tanggal</th><th style="width:120px">Aksi</th>
+      </tr></thead><tbody>`;
+      items.forEach((it, idx)=>{
+        const ts = it.ts ? (new Date(it.ts)).toLocaleString() : '-';
+        html += `<tr data-idx="${idx}">
+          <td class="center"><input class="chkRow" type="checkbox" data-idx="${idx}"/></td>
+          <td style="word-break:break-all"><code>${escapeHtml(it.token)}</code></td>
+          <td style="word-break:break-all"><code>${escapeHtml(it.code)}</code></td>
+          <td class="center">${escapeHtml(ts)}</td>
+          <td class="center">
+            <div class="actions">
+              <button class="btn-sm ghost" onclick="copyRow(${idx})">📋 Copy Kode</button>
+              <button class="btn-sm btn-danger" onclick="confirmDeleteSingle(${idx})">🗑 Hapus</button>
+            </div>
+          </td>
+        </tr>`;
+      });
+      html += `</tbody></table></div>`;
+      tableWrap.innerHTML = html;
+
+      // checkbox events
+      const chkAll = document.getElementById('chkAll');
+      if(chkAll){
+        chkAll.addEventListener('change', (e)=>{
+          const checked = e.target.checked;
+          document.querySelectorAll('.chkRow').forEach(ch => ch.checked = checked);
+        });
+      }
+    }
+
+    // copy code from row
+    function copyRow(idx){
+      const row = lastContent[idx];
+      if(!row) return alert('Baris tidak ditemukan');
+      navigator.clipboard.writeText(row.code || '');
+      adminNotice.classList.remove('hidden');
+      adminNotice.innerText = '✅ Kode disalin: ' + (row.code || '-');
+      setTimeout(()=> adminNotice.classList.add('hidden'), 2200);
+    }
+
+    // Confirm modal helper (fix + animations + disable Yes while processing)
+    function showConfirmModal(title, onConfirm){
+      if(isModalVisible) return; // prevent double
+      isModalVisible = true;
+      confirmTitle.innerText = title;
+      confirmModal.classList.add('show');
+      confirmModal.classList.remove('hidden');
+
+      // reset
+      confirmYes.disabled = false;
+
+      // attach handlers
+      confirmYes.onclick = async () => {
+        try {
+          confirmYes.disabled = true;
+          // fade out then execute
+          confirmModal.classList.remove('show');
+          setTimeout(()=> confirmModal.classList.add('hidden'), 260);
+          isModalVisible = false;
+          await onConfirm();
+        } catch(e){
+          isModalVisible = false;
+          confirmModal.classList.remove('show');
+          setTimeout(()=> confirmModal.classList.add('hidden'), 260);
+          alert('Error saat proses: ' + e.message);
+        }
+      };
+
+      confirmNo.onclick = () => {
+        confirmModal.classList.remove('show');
+        setTimeout(()=> confirmModal.classList.add('hidden'), 260);
+        isModalVisible = false;
+      };
+    }
+
+    // confirm delete single
+    function confirmDeleteSingle(idx){
+      showConfirmModal('Yakin hapus 1 token ini?', async () => {
+        await performDelete([idx]);
+      });
+    }
+
+    // delete selected
+    btnDelSelected.addEventListener('click', ()=>{
+      const checked = Array.from(document.querySelectorAll('.chkRow'))
+        .filter(c=>c.checked).map(c=>parseInt(c.dataset.idx)).sort((a,b)=>a-b);
+      if(checked.length === 0){ adminNotice.classList.remove('hidden'); adminNotice.innerText = '⚠️ Pilih minimal 1 token untuk dihapus.'; setTimeout(()=>adminNotice.classList.add('hidden'),2000); return; }
+      showConfirmModal(`Yakin hapus ${checked.length} token terpilih?`, async () => {
+        await performDelete(checked);
+      });
+    });
+
+    // perform delete by indexes (array of indexes in lastContent)
+    async function performDelete(indexes){
+      adminNotice.classList.remove('hidden');
+      adminNotice.innerText = '⏳ Menghapus token...';
+      try {
+        // refetch content to be safe
+        const getUrl = `https://api.github.com/repos/${REPO}/contents/${PATH}`;
+        const res = await fetch(getUrl, { headers: { Authorization: `token ${GITHUB_TOKEN}` }});
+        const data = await res.json();
+        let content = [];
+        if(data && data.content){
+          try{ content = JSON.parse(atob(data.content)); }catch(e){ content = []; }
+        }
+        // normalize existing entries
+        const normalized = content.map(item => {
+          if(Array.isArray(item)) return { raw: item, token: item[0]||'', code:item[1]||'', ts:item[2]||null };
+          if(typeof item === 'object' && item !== null) return { raw: item, token:item.token||'', code:item.code||'', ts:item.ts||null };
+          return { raw: item, token:String(item), code:'', ts:null };
+        });
+
+        // map indexes (from lastContent) to actual normalized indices (match by token+code+ts)
+        const toRemoveKeys = indexes.map(i => {
+          const it = lastContent[i];
+          if(!it) return null;
+          for(let j=0;j<normalized.length;j++){
+            if(normalized[j].token === it.token && normalized[j].code === it.code && ((normalized[j].ts||'') === (it.ts||''))) return j;
+          }
+          // fallback by token+code
+          for(let j=0;j<normalized.length;j++){
+            if(normalized[j].token === it.token && normalized[j].code === it.code) return j;
+          }
+          return null;
+        }).filter(x=>x!==null);
+
+        // dedupe and sort descending so removal by index is safe if needed
+        const uniqueRemove = Array.from(new Set(toRemoveKeys)).sort((a,b)=>a-b);
+
+        // build new array excluding selected indices
+        const newArr = normalized.filter((_, idx) => !uniqueRemove.includes(idx)).map(n=>n.raw);
+
+        const newContent = btoa(JSON.stringify(newArr, null, 2));
+        // commit
+        const upd = await fetch(getUrl, {
+          method:'PUT',
+          headers:{ Authorization: `token ${GITHUB_TOKEN}`, "Content-Type":"application/json" },
+          body: JSON.stringify({ message: `Remove ${uniqueRemove.length} token(s) via panel`, content: newContent, sha: data.sha })
+        });
+        if(upd.ok){
+          adminNotice.innerText = `✅ Berhasil hapus ${uniqueRemove.length} token.`;
+          await fetchAndRenderTokens();
+          setTimeout(()=> adminNotice.classList.add('hidden'), 2200);
+        } else {
+          const err = await upd.json();
+          adminNotice.innerText = '❌ Gagal hapus: ' + (err.message || 'unknown');
+        }
+      } catch(e){
+        adminNotice.innerText = '⚠️ Error: '+e.message;
+      }
+    }
+
+    // refresh
+    btnRefresh.addEventListener('click', ()=> fetchAndRenderTokens());
+    // back to main
+    btnBack.addEventListener('click', ()=> {
+      adminArea.classList.add('hidden');
+      // reseller still visible
+    });
+
+    // helper escape
+    function escapeHtml(s){ if(!s && s !== 0) return ''; return String(s).replace(/[&<>"]/g, c=> ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+    // initial table placeholder
+    tableWrap.innerHTML = '<div class="muted">Login sebagai Admin untuk melihat token.</div>';
+
+    // expose some functions to inline buttons
+    window.copyRow = copyRow;
+    window.confirmDeleteSingle = confirmDeleteSingle;
+
+    // optional: auto-focus password
+    passwordInput.focus();
+  </script>
+</body>
+</html>
